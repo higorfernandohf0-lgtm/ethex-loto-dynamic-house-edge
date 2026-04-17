@@ -70,6 +70,16 @@ contract EthexLoto is Ownable {
     }
     
     function payIn() external payable { }
+
+    function getHouseEdge(uint8 markedCount) internal pure returns (uint256) {
+    if (markedCount == 1) {
+        return 12;
+    } else if (markedCount <= 3) {
+        return 10;
+    } else {
+        return 8;
+    }
+}
     
     function placeBet(bytes22 params) external payable {
         require(tx.origin == msg.sender);
@@ -83,15 +93,25 @@ contract EthexLoto is Ownable {
         uint8 markedCount;
         uint256 holdAmount;
         uint256 jackpotFee = msg.value * JACKPOT_PERCENT * PRECISION / 100 / PRECISION;
-        uint256 houseEdgeFee = msg.value * HOUSE_EDGE * PRECISION / 100 / PRECISION;
+
+        uint256 tempAmount = msg.value - jackpotFee;
+
+        // calculate marked cells
+        (coefficient, markedCount, holdAmount) = getHold(tempAmount, bet);
+
+        // get dynamic house edge
+        uint256 dynamicHouseEdge = getHouseEdge(markedCount);
+
+        // calculate house fee
+        uint256 houseEdgeFee = msg.value * dynamicHouseEdge * PRECISION / 100 / PRECISION;
+
+        // final bet amount
         uint256 betAmount = msg.value - jackpotFee - houseEdgeFee;
-        
-        (coefficient, markedCount, holdAmount) = getHold(betAmount, bet);
-        
-        require(msg.value * (100 - JACKPOT_PERCENT - HOUSE_EDGE) * (coefficient * 8 - 15 * markedCount) <= 9000 ether * markedCount);
+
+        require(msg.value * (100 - JACKPOT_PERCENT - dynamicHouseEdge) * (coefficient * 8 - 15 * markedCount) <= 9000 ether * markedCount);
         
         require(
-            msg.value * (800 * coefficient - (JACKPOT_PERCENT + HOUSE_EDGE) * (coefficient * 8 + 15 * markedCount)) <= 1500 * markedCount * (address(this).balance - holdBalance));
+            msg.value * (800 * coefficient - (JACKPOT_PERCENT + dynamicHouseEdge) * (coefficient * 8 + 15 * markedCount)) <= 1500 * markedCount * (address(this).balance - holdBalance));
         
         holdBalance += holdAmount;
         
