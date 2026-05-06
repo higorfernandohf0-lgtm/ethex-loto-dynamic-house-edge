@@ -1,63 +1,42 @@
-# Ethex Loto - Dynamic House Edge
+# EthexLoto Dynamic House Edge
+
+This project implements a dynamic house edge system for a Solidity lottery contract.
 
 ## Overview
-This repository contains my implementation for the technical assessment: adding **dynamic house edge** logic to the `EthexLoto` smart contract.
 
-The fixed house edge was replaced with a dynamic calculation based on the number of marked cells, while **strictly preserving** all existing behaviors (public interface, jackpot logic and settlement flow).
+The original lottery contract used a fixed house edge for all bets.
 
-## Task Requirements
-The house edge must be calculated dynamically as follows:
+The goal of this project was to make the house edge dynamic based on the number of selected bet slots while preserving the existing jackpot behavior.
 
-- **1 marked cell** → 12% house edge  
-- **2–3 marked cells** → 10% house edge  
-- **4–6 marked cells** → 8% house edge  
+## Dynamic House Edge Rules
 
-**Constraints:**
-- Do not change any public interfaces
-- Keep jackpot logic unchanged
-- Keep settlement and refund behavior unchanged
-- All provided tests must pass
+- 1 selected slot: 12%
+- 2–3 selected slots: 10%
+- 4–6 selected slots: 8%
 
-## Key Changes
-- Added `getHouseEdge(uint8 markedCount)` internal pure function
-- Updated `placeBet` to calculate marked cells using existing logic and apply dynamic house edge
-- Replaced all fixed `HOUSE_EDGE` references with the new dynamic calculation
-- Adjusted bet amount and fee routing accordingly
+## What I Changed
 
-## Why This Implementation Is Safe
-- Public contract interface was not modified
-- Jackpot registration and payout logic fully preserved
-- Settlement flow (`settleBets`) remains unchanged
-- Reuses existing marked cell counting logic
-- No new state variables or complex mechanisms introduced
+- Added dynamic fee calculation
+- Preserved jackpot behavior
+- Preserved the existing contract interface
+- Updated bet fee logic
+- Ensured expired bet refunds use the correct dynamic fee
 
-## Edge Cases Considered
-- Bets with zero marked cells still revert as expected
-- Expired bets refund the correct dynamic fee-adjusted amount
-- All ranges (1, 2-3, 4-6) apply the right house edge percentage
+## Tech Stack
 
-## Test Results
-All candidate tests are **passing**:
+- Solidity
+- Truffle
+- JavaScript tests
+- Smart contract testing
 
-```bash
-npx truffle test test/CandidateDynamicHouseEdgeTests.js
+## What I Learned
 
- Routes house fee correctly for every marked cell count (1 to 6)
- Reverts when bet has zero marked cells
- Uses dynamic house edge in expired bet refund
+- Reading existing Solidity code
+- Implementing business logic in smart contracts
+- Working with technical requirements
+- Understanding fee models
+- Debugging smart contract behavior
 
-How to Runbash
+## Portfolio Note
 
-# Install dependencies
-npm install
-
-# Run the candidate task tests
-npx truffle test test/CandidateDynamicHouseEdgeTests.js
-
-# Run all tests
-npx truffle test
-
-Tech StackSolidity ^0.5.10
-Truffle Framework
-JavaScript (tests)
-
+This project is part of my Web3 learning journey and helped me practice Solidity, contract logic, and test-driven development.
