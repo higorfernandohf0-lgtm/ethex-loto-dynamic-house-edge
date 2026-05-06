@@ -40,3 +40,7 @@ The goal of this project was to make the house edge dynamic based on the number 
 ## Portfolio Note
 
 This project is part of my Web3 learning journey and helped me practice Solidity, contract logic, and test-driven development.
+
+## Test Status
+
+All candidate tests passed successfully using Truffle.
