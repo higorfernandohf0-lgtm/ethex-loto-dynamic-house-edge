@@ -1,46 +1,78 @@
-# EthexLoto Dynamic House Edge
+# EthexLoto — Dynamic House Edge
 
-This project implements a dynamic house edge system for a Solidity lottery contract.
+A Solidity implementation that replaces fixed house edge logic
+with a dynamic model based on player behavior.
 
-## Overview
+## The Problem
 
-The original lottery contract used a fixed house edge for all bets.
-
-The goal of this project was to make the house edge dynamic based on the number of selected bet slots while preserving the existing jackpot behavior.
+Most on-chain lottery contracts use a fixed house edge regardless
+of how many cells a player marks. This creates an imbalance —
+players who take more risk (fewer cells) pay the same fee as
+those who play it safe. A fair system should reward risk.
 
 ## Dynamic House Edge Rules
 
-- 1 selected slot: 12%
-- 2–3 selected slots: 10%
-- 4–6 selected slots: 8%
+| Marked Cells | House Edge |
+|---|---|
+| 1 cell | 12% |
+| 2–3 cells | 10% |
+| 4–6 cells | 8% |
+
+Players who take more risk pay lower fees. The math is transparent
+and verifiable on-chain.
 
 ## What I Changed
 
-- Added dynamic fee calculation
-- Preserved jackpot behavior
-- Preserved the existing contract interface
-- Updated bet fee logic
-- Ensured expired bet refunds use the correct dynamic fee
+The core change is a single internal function added to the contract:
+
+```solidity
+function getHouseEdge(uint8 markedCount)
+    internal pure returns (uint256) {
+    if (markedCount == 1) return 12;
+    if (markedCount <= 3) return 10;
+    return 8;
+}
+```
+
+Applied inside `placeBet()` — no changes to the public interface,
+jackpot logic, or settlement flow.
+
+## What Stays Unchanged
+
+- Public contract interface
+- Jackpot registration and payout
+- Settlement and refund behavior
+- Existing marked cell counting logic
+
+## Test Results
+
+```bash
+npx truffle test test/CandidateDynamicHouseEdgeTests.js
+
+  ✓ Routes house fee correctly for every marked cell count (1 to 6)
+  ✓ Reverts when bet has zero marked cells
+  ✓ Uses dynamic house edge in expired bet refund
+
+3 passing
+```
+
+## How to Run
+
+```bash
+npm install
+npx truffle test
+```
 
 ## Tech Stack
 
-- Solidity
-- Truffle
-- JavaScript tests
-- Smart contract testing
+Solidity ^0.5.10 · Truffle · JavaScript (tests)
 
 ## What I Learned
 
-- Reading existing Solidity code
-- Implementing business logic in smart contracts
-- Working with technical requirements
-- Understanding fee models
-- Debugging smart contract behavior
+Working on this contract taught me how Solidity handles integer
+division and why fee calculations need to be validated at every
+edge case — a single rounding error in a lottery contract can
+drain the jackpot over thousands of bets.
 
-## Portfolio Note
-
-This project is part of my Web3 learning journey and helped me practice Solidity, contract logic, and test-driven development.
-
-## Test Status
-
-All candidate tests passed successfully using Truffle.
+---
+Built by [Higor Fernando](https://x.com/HigorWeb3)
